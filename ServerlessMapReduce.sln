@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2003
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerlessMapReduce.v1", "ServerlessMapReduce.v1\ServerlessMapReduce.v1.csproj", "{6DEE5CC8-2450-49E7-8D2A-7D5517E3EA50}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerlessMapReduce.v2", "ServerlessMapReduce.v2\ServerlessMapReduce.v2.csproj", "{C436C2B0-A1EC-4E81-8116-711100DD4910}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AAC50527-3434-447D-B33F-8496A11F49C3}"
+	ProjectSection(SolutionItems) = preProject
+		deploy.ps1 = deploy.ps1
+		readme.md = readme.md
+		SetupEnvironment.ps1 = SetupEnvironment.ps1
+		TaxiDataImporter.ps1 = TaxiDataImporter.ps1
+		template.json = template.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6DEE5CC8-2450-49E7-8D2A-7D5517E3EA50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DEE5CC8-2450-49E7-8D2A-7D5517E3EA50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DEE5CC8-2450-49E7-8D2A-7D5517E3EA50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DEE5CC8-2450-49E7-8D2A-7D5517E3EA50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C436C2B0-A1EC-4E81-8116-711100DD4910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C436C2B0-A1EC-4E81-8116-711100DD4910}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C436C2B0-A1EC-4E81-8116-711100DD4910}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C436C2B0-A1EC-4E81-8116-711100DD4910}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A55496BA-D7A8-49B2-8400-657F95A1E292}
+	EndGlobalSection
+EndGlobal
