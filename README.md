@@ -60,6 +60,7 @@ public static async Task Run(DurableOrchestrationContext ctx)
     await ctx.CallActivityAsync("F3", sum);
 }
 ```
+
 In the example above, the fan-out work is distributed to multiple instances of function `F2`, and the work is tracked by using a dynamic list of tasks. The .Net `Task.WhenAll` API is called to wait for all of the called functions to finish. Then the `F2` function outputs are aggregated from the dynamic task list and finally passed on to the `F3` function.
 
 The automatic checkpointing that happens at the await call on `Task.WhenAll` ensures that any crash or reboot midway through does not require a restart of any already completed tasks.
