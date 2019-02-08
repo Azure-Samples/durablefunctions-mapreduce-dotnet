@@ -1,0 +1,21 @@
+{
+  "applicationInsights": {
+    "sampling": {
+      "isEnabled": false
+    }
+  },
+  "durableTask": {
+    "MaxConcurrentActivityFunctions": 1, // ensures scale-out for mappers
+    "logReplayEvents": true // so we can get good telemetry in app insights
+  },
+  "functionTimeout": "00:10:00",
+  "logger": {
+    "categoryFilter": {
+      "categoryLevels": {
+        "Host.Triggers.DurableTask": "Information", // to get logs from DF output to app insights
+        "Host": "Error"
+      },
+      "defaultLevel": "Information"
+    }
+  }
+}
