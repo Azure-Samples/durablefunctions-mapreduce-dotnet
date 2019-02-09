@@ -179,7 +179,7 @@ Right-click either/both of the project(s) and choose 'Publish...'
   - Function app instance
 
 ### PowerShell
-> **Important**: Run `deploy.ps1` in a new PowerShell window after you've executed `SetupEnvironment.ps1`. This refreshes environment variables so the build & deploy commands will execute successfully
+> **Important**: Run `deploy.ps1` in a new PowerShell window only _after_ you've executed `SetupEnvironment.ps1`. This refreshes environment variables so the build & deploy commands will execute successfully
 
 Execute `deploy.ps1` providing:
 - Subscription ID

@@ -57,7 +57,7 @@
                 "name": "Standard_LRS",
                 "tier": "Standard"
             },
-            "kind": "Storage",
+            "kind": "StorageV2",
             "name": "[variables('v2storage')]",
             "apiVersion": "2018-03-01-preview",
             "location": "[parameters('region')]",
@@ -81,7 +81,8 @@
                         }
                     },
                     "keySource": "Microsoft.Storage"
-                }
+                },
+                "accessTier": "Hot"
             },
             "dependsOn": []
         },
@@ -91,7 +92,7 @@
                 "name": "Standard_LRS",
                 "tier": "Standard"
             },
-            "kind": "Storage",
+            "kind": "StorageV2",
             "name": "[variables('v1storage')]",
             "apiVersion": "2018-03-01-preview",
             "location": "[parameters('region')]",
@@ -115,7 +116,8 @@
                         }
                     },
                     "keySource": "Microsoft.Storage"
-                }
+                },
+                "accessTier": "Hot"
             },
             "dependsOn": []
         },
