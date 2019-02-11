@@ -207,3 +207,8 @@ After deployment:
 - Issue an HTTP POST to that endpoint with the `path` parameter populated from the output of the PowerShell script you ran in [2.1](#21-copy-the-dataset-to-an-azure-blob-storage-instance)
 
 You'll receive back a list of URLs you can use to check status, issue new events (not handled by this sample), or terminate the orchestration.
+
+# Notes
+The implementation shown here utilizes a single reducer. If you needed multiple reducers, you would create **a sub-orchestration per reducer**, launch those in parallel, do the `CallActivityAsync()` calls within the sub-orchestrator, reduce the results, pass that up to the parent orchestrator to further reduce the results, and so on.
+
+It's also important to remember while Serverless technologies allow you to scale "infinitely" we have to remember to use the right tool for the right job. Durable Functions will, in theory, scale out to run any number of jobs in parallel and come back to the reduce step so **this approach may work very well for loads that can be highly parallelized** however the machines on which Azure Functions run (in Consumption plan) are only **1 CPU core with 1.5GB of RAM**. This means **this approach _may not_ work well for loads with very large sections to be processed by each mapper**. In this case, you may look in to hosting this implementation on an App Service Plan with large VMs or, even better, a Functions Premium offering with a large VM size to process the data more quickly. Another thing to note is the way DF passes results and parameters around; these are done via Azure Storage Queues which may/may not add unacceptable latency in to your big data process.
