@@ -1,6 +1,11 @@
 ---
-services: functions, durablefunctions
-platforms: dotnet
+name: Big Data Processing: Serverless MapReduce on Azure
+products:
+  - azure-functions
+topic: sample
+description: This sample uses Azure Durable Functions to determine the average speed of New York Yellow taxi trips, per day over all of 2017
+languages:
+  - csharp
 author: BrandonH-MSFT
 ---
 
