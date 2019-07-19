@@ -1,12 +1,18 @@
 ---
-name: 'Big Data Processing: Serverless MapReduce on Azure'
-products:
-  - azure-functions
+page_type: sample
 topic: sample
-description: 'This sample uses Azure Durable Functions to determine the average speed of New York Yellow taxi trips, per day over all of 2017'
 languages:
   - csharp
+  - azurepowershell
+products:
+  - azure
+  - azure-functions
+name: 'Big Data Processing: Serverless MapReduce on Azure'
+description: 'This sample uses Azure Durable Functions to determine the average speed of New York Yellow taxi trips, per day over all of 2017'
 author: BrandonH-MSFT
+ms.author: hurlburb
+ms.date: 02/04/2019
+ms.topic: sample
 ---
 
 # Big Data Processing: Serverless MapReduce on Azure
