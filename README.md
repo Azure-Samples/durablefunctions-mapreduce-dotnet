@@ -7,6 +7,7 @@ languages:
 products:
   - azure
   - azure-functions
+title: 'Big Data Processing: Serverless MapReduce on Azure'
 name: 'Big Data Processing: Serverless MapReduce on Azure'
 description: 'This sample uses Azure Durable Functions to determine the average speed of New York Yellow taxi trips, per day over all of 2017'
 author: BrandonH-MSFT
