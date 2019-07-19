@@ -42,9 +42,7 @@ This extension enables a new type of function called the *orchestrator function*
 
 One of the typical application patterns that can benefit from Durable Functions is the fan-out/fan-in pattern.
 
-<p align="center">
-<img src="./images/DurableFunctionsFanOutFanIn.png"/>
-</p>
+![](./images/DurableFunctionsFanOutFanIn.png)
 
 With normal functions, fanning out can be done by having the function send multiple messages to a queue. However, fanning back in is much more challenging. You'd have to write code to track when the queue-triggered functions end and store function outputs. The Durable Functions extension handles this pattern with relatively simple code:
 ```csharp
@@ -94,9 +92,7 @@ This performs the following **permanent** changes to your machine:
 
 ## 1. Serverless MapReduce on Azure ##
 
-<p align="center">
-<img src="./images/MapReduceArchitecture.png"/>
-</p>
+![](./images/MapReduceArchitecture.png)
 
 The above diagram shows the architecture a MapReduce implementation generally follows.
 
@@ -127,12 +123,14 @@ You'll first notice there are two projects in the solution. One is a Function v2
 This is where all our MapReduce logic lies. Let's have a look
 
 ##### StartAsync
-The entry point to our Durable Orchestration, this method is triggered by an HTTP request to the Function which contains a single `path` query parameter specifying the URL to the blob storage account containing the files to process. Example: 
-~~~
+The entry point to our Durable Orchestration, this method is triggered by an HTTP request to the Function which contains a single `path` query parameter specifying the URL to the blob storage account containing the files to process. Example:
+
+```
 POST /api/StartAsync?code=Pd459lsir2CILjc8jRAkO6TLy3pasuBDikYZMZRKAjaTgjh00OW2wg==&path=https://mystorage.blob.core.windows.net/newyorkcitytaxidata/2017/yellow_tripdata_2017 HTTP/1.1
 Host: myfunction.azurewebsites.net
 Cache-Control: no-cache
-~~~
+```
+
 Note the format of the `path` variable. It's not only used to denote the container in which to look, but also the prefix to use when searching for the files. You can, therefore, get as arbitrary or specific as you want but *if you have the files in a subfolder you **must** specify it*.
 
 Once StartAsync is kicked off, it parses out the container name and prefix from the `path` parameter and kicks off a new orchestration with `BeginMapReduce` as the entry point
@@ -141,6 +139,7 @@ Once StartAsync is kicked off, it parses out the container name and prefix from 
 This is the *actual* orchestrator for the entire process. First, we retrieve all the blobs from the storage container which match the prefix, using the Activity function `GetFileListAsync`. We must do this as the queries to Blob Storage are asynchronous and therefore [cannot live inside an orchestrator function](https://docs.microsoft.com/en-us/azure/azure-functions/durable-functions-checkpointing-and-replay#orchestrator-code-constraints).
 
 After getting the list of files to include it then spins up a mapper for each, in parallel:
+
 ```csharp
 var tasks = new Task<double[]>[files.Length];
 for (int i = 0; i < files.Length; i++)
@@ -150,12 +149,14 @@ for (int i = 0; i < files.Length; i++)
         files[i]);
 }
 ```
+
 We add the resulting `Task<T>` object from these calls to an array of Tasks, and we wait for them all to complete using `Task.WhenAll()`
 
 Once they've completed, we've got mappers created for each file and it's time to reduce them. We do this by calling out *once* to another activity function: `Reducer`. This function does the math to aggregate the average speed computed for each day of the week in each line of the files in to an overall average across all the files for each day of the week.
 
 After this, we return the result as a string back to the Orchestrator (`BeginMapReduce`) who sets this as `output` for the entire orchestration which the caller can discover by issuing an HTTP GET to the status API:
-~~~
+
+```
 GET /admin/extensions/DurableTaskExtension/instances/14f9ae24aa5945759c3bc764ef074912?taskHub=DurableFunctionsHub&amp;connection=Storage&amp;code=ahyNuruLOooCFiF6QB7NaI6FWCHGjukAdtP/JGYXhFWD/2lxI9ozMg== HTTP/1.1
 Host: myfunction.azurewebsites.net
 
@@ -172,7 +173,7 @@ Host: myfunction.azurewebsites.net
     "createdTime": "2018-08-29T17:52:41Z",
     "lastUpdatedTime": "2018-08-29T18:00:42Z"
 }
-~~~
+```
 
 > Note: Give this Status API a hit while the orchestration is running and you'll get an idea of where it's at in the process due to the calls to `SetCustomStatus` throughout the code
 
@@ -209,7 +210,7 @@ After deployment:
 - Visit your Function App in the Azure Portal
 - Click the `StartAsync` function 
 - Click 'Get function URL' & copy it for usage in your favorite REST API testing program
-<p align="center"><img src="./images/getfunctionurl.png"></p>
+![](./images/getfunctionurl.png)
 
 - Issue an HTTP POST to that endpoint with the `path` parameter populated from the output of the PowerShell script you ran in [2.1](#21-copy-the-dataset-to-an-azure-blob-storage-instance)
 
