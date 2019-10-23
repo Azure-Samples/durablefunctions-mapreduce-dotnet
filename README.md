@@ -9,6 +9,7 @@ products:
   - azure-functions
 name: "Big Data Processing: Serverless MapReduce on Azure"
 description: "This sample uses Azure Durable Functions to determine the average speed of New York Yellow taxi trips, per day over all of 2017."
+urlFragment: big-data-processing-serverless-mapreduce-on-azure
 ---
 
 # Big Data Processing: Serverless MapReduce on Azure
@@ -90,7 +91,7 @@ This performs the following **permanent** changes to your machine:
 - Installs [.Net Core SDK](https://www.microsoft.com/net/download) (to build v2 app)
 - Installs [.Net 4.6.1 Developer pack](https://www.microsoft.com/en-us/download/details.aspx?id=49978) (to build v1 app)
 
-## 1. Serverless MapReduce on Azure ##
+## 1. Serverless MapReduce on Azure
 
 ![](./images/MapReduceArchitecture.png)
 
@@ -103,7 +104,7 @@ You will use ***Durable Functions*** - specifically the ***Fan-out/Fan-in patter
 The source data you will be using for this MapReduce implementation can be found here: <http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml>
 and contains 12 CSV files of roughly 800MB each (`Yellow` dataset) you need to make available in Azure Blob storage - total size is ~9.6GB.
 
-## 2. Hands on: Implementing the MapReduce pattern step by step ##
+## 2. Hands on: Implementing the MapReduce pattern step by step
 ### 2.1 Copy the dataset to an Azure Blob Storage instance
 Open a new PowerShell window & execute `TaxiDataImporter.ps1` from the repo directory to copy each file from the NYC Taxi site in to your Azure Storage Account
 
@@ -216,7 +217,8 @@ After deployment:
 
 You'll receive back a list of URLs you can use to check status, issue new events (not handled by this sample), or terminate the orchestration.
 
-# Notes
+## Notes
+
 The implementation shown here utilizes a single reducer. If you needed multiple reducers, you would create **a sub-orchestration per reducer**, launch those in parallel, do the `CallActivityAsync()` calls within the sub-orchestrator, reduce the results, pass that up to the parent orchestrator to further reduce the results, and so on.
 
 It's also important to remember while Serverless technologies allow you to scale "infinitely" we must use the right tool for the right job. Durable Functions will, in theory, scale out to run any number of jobs in parallel and come back to the reduce step so **this approach may work very well for loads that can be highly parallelized** however the machines on which Azure Functions run (in Consumption plan) are of limited specs ([more detail can be found here in the docs](https://docs.microsoft.com/en-us/azure/azure-functions/functions-scale#how-the-consumption-plan-works)). This means **this approach _may not_ work well for loads with very large sections to be processed by each mapper**. In this case, you may look in to hosting this implementation on an App Service Plan with large VMs or, even better, a Functions Premium offering with a large VM size to process the data more quickly. Another thing to note is the way DF passes results and parameters around; these are done via Azure Storage Queues which may/may not add unacceptable latency in to your big data process.
