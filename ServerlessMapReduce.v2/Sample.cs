@@ -26,7 +26,7 @@ namespace ServerlessMapReduce
         {
             // retrieve storage blobs URI of the taxi dataset
             var pathString = req.RequestUri.ParseQueryString()[@"path"] ?? throw new ArgumentNullException(@"required query string parameter 'path' not found");
-            Uri path = new Uri(pathString);
+            var path = new Uri(pathString);
 
             var containerUrl = path.GetLeftPart(UriPartial.Authority) + "/" + path.Segments[1];
             var prefix = string.Join(string.Empty, path.Segments.Skip(2));
@@ -66,7 +66,7 @@ namespace ServerlessMapReduce
                 context.SetCustomStatus(new { status = @"Creating mappers", files });
             }
             //create mapper tasks which download and calculate avg speed from each csv file
-            Task<double[]>[] tasks = new Task<double[]>[files.Length];
+            var tasks = new Task<double[]>[files.Length];
             for (var i = 0; i < files.Length; i++)
             {
                 tasks[i] = context.CallActivityAsync<double[]>(
@@ -108,13 +108,12 @@ namespace ServerlessMapReduce
         /// </summary>
         [FunctionName(nameof(GetFileListAsync))]
         public static async Task<string[]> GetFileListAsync(
-            [ActivityTrigger] string[] paras,
-            ILogger log)
+            [ActivityTrigger] string[] paras)
         {
-            CloudBlobContainer cloudBlobContainer = new CloudBlobContainer(new Uri(paras[0]));
+            var cloudBlobContainer = new CloudBlobContainer(new Uri(paras[0]));
 
             var blobs = Enumerable.Empty<IListBlobItem>();
-            BlobContinuationToken continuationToken = default(BlobContinuationToken);
+            var continuationToken = default(BlobContinuationToken);
             do
             {
                 var segmentBlobs = await cloudBlobContainer.ListBlobsSegmentedAsync(paras[1], continuationToken);
@@ -139,8 +138,10 @@ namespace ServerlessMapReduce
             var numberOfLogsPerDayOfWeek = new int[7];
 
             // download blob file
+#pragma warning disable IDE0067 // Dispose objects before losing scope
             // Don't wrap in a Using because this was causing occasional ObjectDisposedException errors in v2 executions
-            StreamReader reader = new StreamReader(await _httpClient.GetStreamAsync(fileUri));
+            var reader = new StreamReader(await _httpClient.GetStreamAsync(fileUri));
+#pragma warning restore IDE0067 // Dispose objects before losing scope
 
             var lineText = string.Empty;
             // read a line from NetworkStream
@@ -156,10 +157,10 @@ namespace ServerlessMapReduce
                 }
 
                 // retrieve the value of pickup_datetime column
-                DateTime pickup_datetime = DateTime.Parse(segdata[1]);
+                var pickup_datetime = DateTime.Parse(segdata[1]);
 
                 // retrieve the value of dropoff_datetime column
-                DateTime dropoff_datetime = DateTime.Parse(segdata[2]);
+                var dropoff_datetime = DateTime.Parse(segdata[2]);
 
                 // retrieve the value of trip_distance column
                 var trip_distance = Convert.ToDouble(segdata[4]);
@@ -177,10 +178,12 @@ namespace ServerlessMapReduce
                             continue;
                         }
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch (DivideByZeroException)
                     {   // skip it
                         continue;
                     }
+#pragma warning restore CA1031 // Do not catch general exception types
 
                     // sum of avg speed by each day of week
                     speedsByDayOfWeek[(int)pickup_datetime.DayOfWeek] += avgSpeed;
@@ -190,7 +193,7 @@ namespace ServerlessMapReduce
                 }
             }
 
-            List<double> results = numberOfLogsPerDayOfWeek
+            var results = numberOfLogsPerDayOfWeek
                 .Select((val, idx) => val != 0 ? speedsByDayOfWeek[idx] / val : 0)
                 .AsParallel()
                 .ToList();
@@ -241,11 +244,10 @@ namespace ServerlessMapReduce
         /// </summary>
         [FunctionName(nameof(WriteToBlob))]
         public static async Task WriteToBlob(
-            [ActivityTrigger] string content,
-            ILogger log)
+            [ActivityTrigger] string content)
         {
             var storageConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+            var storageAccount = CloudStorageAccount.Parse(storageConnectionString);
 
             // Create the CloudBlobClient that represents the Blob storage endpoint for the storage account.
             var cloudBlobClient = storageAccount.CreateCloudBlobClient();
