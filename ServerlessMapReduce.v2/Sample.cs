@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
@@ -20,7 +21,7 @@ namespace ServerlessMapReduce
 
         [FunctionName(nameof(StartAsync))]
         public static async Task<HttpResponseMessage> StartAsync([HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage req,
-            [OrchestrationClient] DurableOrchestrationClient starter,
+            [DurableClient] IDurableClient starter,
             ILogger log)
         {
             // retrieve storage blobs URI of the taxi dataset
@@ -38,7 +39,7 @@ namespace ServerlessMapReduce
         }
 
         [FunctionName(nameof(BeginMapReduce))]
-        public static async Task<string> BeginMapReduce([OrchestrationTrigger]DurableOrchestrationContext context, ILogger log)
+        public static async Task<string> BeginMapReduce([OrchestrationTrigger]IDurableOrchestrationContext context, ILogger log)
         {
             var input = context.GetInput<JObject>();
 
