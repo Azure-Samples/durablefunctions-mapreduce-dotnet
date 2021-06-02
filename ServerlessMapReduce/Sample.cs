@@ -20,7 +20,7 @@ namespace ServerlessMapReduce
         private static readonly HttpClient _httpClient = HttpClientFactory.Create();
 
         [FunctionName(nameof(StartAsync))]
-        public static async Task<HttpResponseMessage> StartAsync([HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage req,
+        public static async Task<HttpResponseMessage> StartAsync([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestMessage req,
             [DurableClient] IDurableClient starter,
             ILogger log)
         {
@@ -39,7 +39,7 @@ namespace ServerlessMapReduce
         }
 
         [FunctionName(nameof(BeginMapReduce))]
-        public static async Task<string> BeginMapReduce([OrchestrationTrigger]IDurableOrchestrationContext context, ILogger log)
+        public static async Task<string> BeginMapReduce([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger log)
         {
             var input = context.GetInput<JObject>();
 

@@ -9,4 +9,4 @@ Write-Host "Installing Chocolatey so we can automate installation of other compo
 Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
 Write-Host "Installing components via Chocolatey..." -ForegroundColor Yellow
-cinst dotnetcore-sdk netfx-4.6.1-devpack -y
+cinst dotnetcore-sdk -y

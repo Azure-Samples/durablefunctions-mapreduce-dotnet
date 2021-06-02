@@ -18,10 +18,10 @@ param(
 )
 
 function ZipDeploy([string]$resourceGroupName, [string]$appname, [string]$zipFilePath, [string]$platform) {
-    dotnet pack -c Release -v q >$null
-    Remove-Item bin/release/$platform/publish/local.settings.json -Force -ErrorAction SilentlyContinue >$null
+    dotnet build -c release -v q >$null
+    Remove-Item bin/release/$platform/local.settings.json -Force -ErrorAction SilentlyContinue >$null
     Remove-Item deploy.zip -Force -ErrorAction SilentlyContinue >$null
-    Compress-Archive -Path "bin/release/$platform/publish/*" -DestinationPath $zipFilePath >$null
+    Compress-Archive -Path "bin/release/$platform/*" -DestinationPath $zipFilePath >$null
 
     $publishProfile = [xml](Get-AzWebAppPublishingProfile -ResourceGroupName $resourceGroupName -Name $appname)
     foreach ($profile in $publishProfile.FirstChild.ChildNodes) {
@@ -85,17 +85,11 @@ else {
 Write-Host "Deploying Azure resources..."
 New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -base_name $baseName -region $region >$null
 
-Write-Host "Deploying v1 app bits..." -ForegroundColor Yellow
-$appname = $baseName + "v1"
+Write-Host "Deploying app bits..." -ForegroundColor Yellow
+$appname = $baseName
 
-Set-Location .\ServerlessMapReduce.v1
-ZipDeploy $resourceGroupName $appname "deploy.zip" "net461"
-
-Write-Host "Deploying v2 app bits..." -ForegroundColor Yellow
-$appname = $baseName + "v2"
-
-Set-Location ..\ServerlessMapReduce.v2
-ZipDeploy $resourceGroupName $appname "deploy.zip" "netstandard2.0"
+Set-Location .\ServerlessMapReduce
+ZipDeploy $resourceGroupName $appname "deploy.zip" "netcoreapp3.1"
 
 Set-Location ..
 

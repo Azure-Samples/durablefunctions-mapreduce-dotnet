@@ -2,7 +2,7 @@
   "version": "2.0",
   "logging": {
     "applicationInsights": {
-      "sampling": {
+      "samplingSettings": {
         "isEnabled": false
       }
     },
@@ -14,8 +14,7 @@
   },
   "extensions": {
     "durableTask": {
-      "MaxConcurrentActivityFunctions": 1, // ensures scale-out for mappers
-      "logReplayEvents": true // so we can get good telemetry in app insights
+      "maxConcurrentActivityFunctions": 1 // ensures scale-out for mappers
     }
   },
   "functionTimeout": "00:10:00"
