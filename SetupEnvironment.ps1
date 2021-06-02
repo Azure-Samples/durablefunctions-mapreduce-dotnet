@@ -3,7 +3,7 @@ Write-Host "Adding Powershell Gallery repository for Azure Resource Manager inst
 Set-PSRepository PSGallery -InstallationPolicy Trusted
 
 Write-Host "Thanks! Installing Azure RM PowerShell module..." -ForegroundColor Yellow
-Install-Module -Name AzureRM >$null
+Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force >$null
 
 Write-Host "Installing Chocolatey so we can automate installation of other components needed to build the solution..." -ForegroundColor Yellow
 Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))

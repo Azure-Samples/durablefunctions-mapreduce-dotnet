@@ -1,4 +1,4 @@
-﻿<#
+<#
     .Synopsis
     Transfers yellow taxi data from NYC trip website to an Azure Storage Blob container
 
@@ -36,49 +36,49 @@ Function Get-BlobFilePath {
 }
 
 # sign in
-$currentSubscription = Get-AzureRMSubscription -SubscriptionID $subscriptionId -ErrorAction SilentlyContinue
+$currentSubscription = Get-AzSubscription -SubscriptionID $subscriptionId -ErrorAction SilentlyContinue
 if (!$currentSubscription) {
     Write-Host "Logging in..."
-    Login-AzureRmAccount >$null
+    Login-AzAccount >$null
 }
 
 $ErrorActionPreference = "Stop"
 
 # select subscription
-Select-AzureRmSubscription -SubscriptionID $subscriptionId >$null
+Select-AzSubscription -Subscription $subscriptionId >$null
 
 #Create or check for existing resource group
-$resourceGroup = Get-AzureRmResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
+$resourceGroup = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
 if (!$resourceGroup) {
     if (!$region) {
         Write-Host "Resource group '$resourceGroupName' does not exist. To create a new resource group, please enter a location."
         $region = Read-Host "region"
     }
     Write-Host "Creating resource group '$resourceGroupName' in location '$region'"
-    New-AzureRmResourceGroup -Name $resourceGroupName -Location $region >$null
+    New-AzResourceGroup -Name $resourceGroupName -Location $region >$null
 }
 else {
     Write-Host "Using existing resource group '$resourceGroupName'"
 }
 
-$targetStorageAccount = Get-AzureRmStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName -ErrorAction SilentlyContinue 
+$targetStorageAccount = Get-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName -ErrorAction SilentlyContinue 
 if (!$targetStorageAccount) {
     Write-Host "Creating storage account..."
-    $targetStorageAccount = New-AzureRmStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName -SkuName Standard_LRS -Location $region -Kind BlobStorage -AccessTier Hot
+    $targetStorageAccount = New-AzStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName -SkuName Standard_LRS -Location $region -Kind BlobStorage -AccessTier Hot
 }
 
 $context = $targetStorageAccount.Context
 
-$targetContainer = Get-AzureStorageContainer -Context $context -Name $containerName -ErrorAction SilentlyContinue
+$targetContainer = Get-AzStorageContainer -Context $context -Name $containerName -ErrorAction SilentlyContinue
 if (!$targetContainer) {
     Write-Host "Creating container..."
-    $targetContainer = New-AzureStorageContainer -Context $context -Name $containerName -Permission Container
+    $targetContainer = New-AzStorageContainer -Context $context -Name $containerName -Permission Container
 }
 
 for ($i = 1; $i -le 12; $i++) {
     $targetFilename = "yellow_tripdata_2017-$($i.ToString('00')).csv"
     Write-Output "Queuing download for $targetFilename ..."
-    Start-AzureStorageBlobCopy `
+    Start-AzStorageBlobCopy `
         -AbsoluteUri "https://s3.amazonaws.com/nyc-tlc/trip+data/$targetFilename" `
         -DestContainer $containerName `
         -DestBlob (Get-BlobFilePath $subfolderName $targetFilename) `
@@ -101,7 +101,7 @@ Write-Output "You can Ctrl+C if you don't want to wait, otherwise Progress is sh
 
 for ($i = 1; $i -le 12; $i++) {
     $targetFilename = "yellow_tripdata_2017-$($i.ToString('00')).csv"
-    Get-AzureStorageBlobCopyState -Context $context -Blob (Get-BlobFilePath $subfolderName $targetFilename) -Container $containerName -WaitForComplete >$null
+    Get-AzStorageBlobCopyState -Context $context -Blob (Get-BlobFilePath $subfolderName $targetFilename) -Container $containerName -WaitForComplete >$null
 }
 
 Write-Host "Done!" -ForegroundColor Green

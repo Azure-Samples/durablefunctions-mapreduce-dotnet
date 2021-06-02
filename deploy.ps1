@@ -23,7 +23,7 @@ function ZipDeploy([string]$resourceGroupName, [string]$appname, [string]$zipFil
     Remove-Item deploy.zip -Force -ErrorAction SilentlyContinue >$null
     Compress-Archive -Path "bin/release/$platform/publish/*" -DestinationPath $zipFilePath >$null
 
-    $publishProfile = [xml](Get-AzureRmWebAppPublishingProfile -ResourceGroupName $resourceGroupName -Name $appname)
+    $publishProfile = [xml](Get-AzWebAppPublishingProfile -ResourceGroupName $resourceGroupName -Name $appname)
     foreach ($profile in $publishProfile.FirstChild.ChildNodes) {
         if ($profile.publishMethod -eq "MSDeploy") {
             $creds = @{
@@ -51,31 +51,31 @@ $templateFilePath = "template.json"
 $resourceGroupName = $baseName + "RG"
 
 # sign in
-$currentSubscription = Get-AzureRMSubscription -SubscriptionID $subscriptionId -ErrorAction SilentlyContinue
+$currentSubscription = Get-AzSubscription -SubscriptionID $subscriptionId -ErrorAction SilentlyContinue
 if (!$currentSubscription) {
     Write-Host "Logging in..."
-    Login-AzureRmAccount >$null
+    Login-AzAccount >$null
 }
 
 $ErrorActionPreference = "Stop"
 
 # select subscription
-Select-AzureRmSubscription -SubscriptionID $subscriptionId >$null
+Select-AzSubscription -Subscription $subscriptionId >$null
 
 # Register required RPs
 foreach ($resourceProvider in @("microsoft.insights", "microsoft.storage", "microsoft.web")) {
-    Register-AzureRmResourceProvider -ProviderNamespace $resourceProvider >$null
+    Register-AzResourceProvider -ProviderNamespace $resourceProvider >$null
 }
 
 #Create or check for existing resource group
-$resourceGroup = Get-AzureRmResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
+$resourceGroup = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
 if (!$resourceGroup) {
     if (!$region) {
         Write-Host "Resource group '$resourceGroupName' does not exist. To create a new resource group, please enter a location."
         $region = Read-Host "region"
     }
     Write-Host "Creating resource group '$resourceGroupName' in location '$region'"
-    New-AzureRmResourceGroup -Name $resourceGroupName -Location $region >$null
+    New-AzResourceGroup -Name $resourceGroupName -Location $region >$null
 }
 else {
     Write-Host "Using existing resource group '$resourceGroupName'"
@@ -83,7 +83,7 @@ else {
 
 # Start the deployment
 Write-Host "Deploying Azure resources..."
-New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -base_name $baseName -region $region >$null
+New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -base_name $baseName -region $region >$null
 
 Write-Host "Deploying v1 app bits..." -ForegroundColor Yellow
 $appname = $baseName + "v1"
