@@ -14,7 +14,7 @@ urlFragment: big-data-processing-serverless-mapreduce-on-azure
 
 # Big Data Processing: Serverless MapReduce on Azure
 
-### Introduction into MapReduce
+## Introduction into MapReduce
 
 **MapReduce** is a programming model that allows processing and generating big data sets with a parallel, distributed algorithm on a cluster.
 
@@ -29,23 +29,24 @@ Both the input and output of the MapReduce implementation are ``<key, value>`` p
 
 The model is a specialization of the ```split-apply-combine``` strategy for data analysis and allows for significant increased speed in a multi-threaded implementation.
 
-### Introduction into Durable Functions
+## Introduction into Durable Functions
 
 **Durable Functions** is an extension of [Azure Functions](https://functions.azure.com) and [Azure WebJobs](https://docs.microsoft.com/en-us/azure/app-service/web-sites-create-web-jobs) that allows writing *long-running*, *stateful* function orchestrations in code in a serverless environment.
 
 This extension enables a new type of function called the *orchestrator function* that allows you to do several new things that differentiates it from an ordinary, stateless function:
 
-* They are stateful workflows **authored in code**. No JSON schema or designers.
-* They can *synchronously* and *asynchronously* **call other functions** and **save output to local variables**.
-* They **automatically checkpoint** their progress whenever the function awaits so that local state is never lost if the process recycles or the VM reboots.
+- They are stateful workflows **authored in code**. No JSON schema or designers.
+- They can *synchronously* and *asynchronously* **call other functions** and **save output to local variables**.
+- They **automatically checkpoint** their progress whenever the function awaits so that local state is never lost if the process recycles or the VM reboots.
 
-#### Durable Functions: Fan-out/fan-in ####
+### Durable Functions: Fan-out/fan-in
 
 One of the typical application patterns that can benefit from Durable Functions is the fan-out/fan-in pattern.
 
-![](./images/DurableFunctionsFanOutFanIn.png)
+![Fan out/Fan in diagram for Durable Functions](./images/DurableFunctionsFanOutFanIn.png)
 
 With normal functions, fanning out can be done by having the function send multiple messages to a queue. However, fanning back in is much more challenging. You'd have to write code to track when the queue-triggered functions end and store function outputs. The Durable Functions extension handles this pattern with relatively simple code:
+
 ```csharp
 public static async Task Run(DurableOrchestrationContext ctx)
 {
@@ -74,18 +75,22 @@ The automatic checkpointing that happens at the await call on `Task.WhenAll` ens
 > **Note:** You can read more about Durable Functions here: <https://docs.microsoft.com/en-us/azure/azure-functions/durable-functions-overview>
 
 ### Prerequisites
+
 Before you open or build the solution in this repo, make sure you have the following:
+
 - An active [Microsoft Azure](https://azure.microsoft.com/en-us/free) Subscription (available free!)
-- [Optional] [Visual Studio 2017](https://visualstudio.microsoft.com/ "Click to see all offerings") [Community Edition](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=15# "Download Community Edition now") (free!)
+- [Optional] [Visual Studio 2019](https://visualstudio.microsoft.com/) [Community Edition](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16) (free!)
 
 If you don't (want to) install Visual Studio and deploy via 'Publish', check the [Visual Studio-less deployment environment setup](#visual-studio-less-deployment-environment-setup) section below to see if you need to run the setup script included in this repo to grab other bits necessary for automatic deployment.
 
 ## Visual Studio-less deployment environment setup
+
 You can set up your PC environment to enable deployment of this solution without installing Visual Studio by executing the `SetupEnvironment.ps1` PowerShell script **from an Administrator PowerShell instance**.
 
 > Note: If you've never run PowerShell scripts on your computer, you'll need to change the Execution Policy to allow script running by executing `Set-ExecutionPolicy Bypass -Scope Process -Force` before running the above command. Using `-Scope Process` here ensures ExecutionPolicy isn't permanently set to allow scripts on your machine, but rather just while you're doing the import
 
 This performs the following **permanent** changes to your machine:
+
 - Installs [Chocolatey](https://chocolatey.org) (for package installation automation)
 - Installs [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/install-azurerm-ps?view=azurermps-6.8.1#requirements)
 - Installs [.Net Core SDK](https://www.microsoft.com/net/download) (to build v2 app)
@@ -93,7 +98,7 @@ This performs the following **permanent** changes to your machine:
 
 ## 1. Serverless MapReduce on Azure
 
-![](./images/MapReduceArchitecture.png)
+![Architecture of how MapReduce algorithm applies to this solution](./images/MapReduceArchitecture.png)
 
 The above diagram shows the architecture a MapReduce implementation generally follows.
 
@@ -105,28 +110,34 @@ The source data you will be using for this MapReduce implementation can be found
 and contains 12 CSV files of roughly 800MB each (`Yellow` dataset) you need to make available in Azure Blob storage - total size is ~9.6GB.
 
 ## 2. Hands on: Implementing the MapReduce pattern step by step
+
 ### 2.1 Copy the dataset to an Azure Blob Storage instance
+
 Open a new PowerShell window & execute `TaxiDataImporter.ps1` from the repo directory to copy each file from the NYC Taxi site in to your Azure Storage Account
 
 You'll be asked to provide the following:
+
 - A connection string to your Azure Storage account
 - The container name within the storage account into which to copy the data
 
-> Note: If you wish to specify a subfolder, you'll need to execute the cmdlet with the `-subfolderName` parameter; it won't prompt you for it because it's optional. You can get examples of usage with `Get-Help Import-TaxiDatasetToAzureStorage` 
+> Note: If you wish to specify a subfolder, you'll need to execute the cmdlet with the `-subfolderName` parameter; it won't prompt you for it because it's optional. You can get examples of usage with `Get-Help Import-TaxiDatasetToAzureStorage`
 
 The copy will kick off and should only take a couple of minutes as **you're using Azure's bandwidth to do the downloading**, not your own.
 
 ### 2.2 The code
+
 Open ServerlessMapReduce.sln in Visual Studio
 You'll first notice there are two projects in the solution. One is a Function v2 (.Net Standard) project, the other is a Function v1 (.Net 4.x aka "netfx") project. **The code for each project is identical, and shared between the two via linked files.**
 
 #### Sample.cs
+
 This is where all our MapReduce logic lies. Let's have a look
 
 ##### StartAsync
+
 The entry point to our Durable Orchestration, this method is triggered by an HTTP request to the Function which contains a single `path` query parameter specifying the URL to the blob storage account containing the files to process. Example:
 
-```
+```text
 POST /api/StartAsync?code=Pd459lsir2CILjc8jRAkO6TLy3pasuBDikYZMZRKAjaTgjh00OW2wg==&path=https://mystorage.blob.core.windows.net/newyorkcitytaxidata/2017/yellow_tripdata_2017 HTTP/1.1
 Host: myfunction.azurewebsites.net
 Cache-Control: no-cache
@@ -137,6 +148,7 @@ Note the format of the `path` variable. It's not only used to denote the contain
 Once StartAsync is kicked off, it parses out the container name and prefix from the `path` parameter and kicks off a new orchestration with `BeginMapReduce` as the entry point
 
 ##### BeginMapReduce
+
 This is the *actual* orchestrator for the entire process. First, we retrieve all the blobs from the storage container which match the prefix, using the Activity function `GetFileListAsync`. We must do this as the queries to Blob Storage are asynchronous and therefore [cannot live inside an orchestrator function](https://docs.microsoft.com/en-us/azure/azure-functions/durable-functions-checkpointing-and-replay#orchestrator-code-constraints).
 
 After getting the list of files to include it then spins up a mapper for each, in parallel:
@@ -157,7 +169,7 @@ Once they've completed, we've got mappers created for each file and it's time to
 
 After this, we return the result as a string back to the Orchestrator (`BeginMapReduce`) who sets this as `output` for the entire orchestration which the caller can discover by issuing an HTTP GET to the status API:
 
-```
+```text
 GET /admin/extensions/DurableTaskExtension/instances/14f9ae24aa5945759c3bc764ef074912?taskHub=DurableFunctionsHub&amp;connection=Storage&amp;code=ahyNuruLOooCFiF6QB7NaI6FWCHGjukAdtP/JGYXhFWD/2lxI9ozMg== HTTP/1.1
 Host: myfunction.azurewebsites.net
 
@@ -179,24 +191,31 @@ Host: myfunction.azurewebsites.net
 > Note: Give this Status API a hit while the orchestration is running and you'll get an idea of where it's at in the process due to the calls to `SetCustomStatus` throughout the code
 
 ## Deployment
+
 There are two ways to choose from to deploy this solution to your own Azure subscription:
+
 ### Visual Studio
-Right-click either/both of the project(s) and choose 'Publish...' 
+
+Right-click either/both of the project(s) and choose 'Publish...'
+
 - Walk through the wizard to create
   - App service plan
   - Storage account
   - Function app instance
 
 ### PowerShell
+
 > **Important**: Run `deploy.ps1` in a new PowerShell window only _after_ you've executed `SetupEnvironment.ps1`. This refreshes environment variables so the build & deploy commands will execute successfully
 
 Execute `deploy.ps1` providing:
+
 - Subscription ID
 - Base name for resources
 
 > Note: By default all resources will be provisioned in the West US 2 region of Azure. If you wish to have them somewhere else, provide the `-region` parameter to the deployment script
 
 and the following will be provisioned for you
+
 - New Resource group
 - 2 Application Insights instances (one for each of v1 and v2 Function apps)
 - 2 Storage accounts
@@ -207,11 +226,14 @@ Naming of the Function App and Application Insights instances will follow (base 
 Naming of the Storage Accounts will follow (base name)+storv1/storv2
 
 ## Execution / testing
+
 After deployment:
+
 - Visit your Function App in the Azure Portal
-- Click the `StartAsync` function 
+- Click the `StartAsync` function
 - Click 'Get function URL' & copy it for usage in your favorite REST API testing program
-![](./images/getfunctionurl.png)
+
+![Screenshot of obtaining the Function URL from the Azure Portal](./images/getfunctionurl.png)
 
 - Issue an HTTP POST to that endpoint with the `path` parameter populated from the output of the PowerShell script you ran in [2.1](#21-copy-the-dataset-to-an-azure-blob-storage-instance)
 
